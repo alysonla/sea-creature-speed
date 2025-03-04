@@ -4,13 +4,388 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sea Creature Speed Game</title>
-  <script src="https://unpkg.com/react@17/umd/react.production.min.js"></script>
-  <script src="https://unpkg.com/react-dom@17/umd/react-dom.production.min.js"></script>
-  <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    }
+    
+    body {
+      background-color: #f0f8ff;
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #e6f2ff;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    h1 {
+      color: #1e40af;
+      text-align: center;
+      margin-bottom: 16px;
+      font-size: 28px;
+    }
+    
+    .game-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    
+    .game-content {
+      background-color: white;
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 24px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+    
+    h2 {
+      text-align: center;
+      margin-bottom: 16px;
+      font-size: 20px;
+    }
+    
+    .creature-card {
+      background-color: #e6f2ff;
+      padding: 16px;
+      border-radius: 8px;
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    
+    .creature-name {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+    
+    .creature-emoji {
+      font-size: 64px;
+      height: 96px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+    
+    .actual-speed {
+      font-weight: bold;
+      margin-top: 8px;
+    }
+    
+    .slider-container {
+      margin-bottom: 24px;
+    }
+    
+    .slider-label {
+      display: block;
+      text-align: center;
+      margin-bottom: 8px;
+    }
+    
+    .slider-input {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    
+    input[type="range"] {
+      flex-grow: 1;
+    }
+    
+    .slider-value {
+      font-weight: bold;
+      width: 48px;
+      text-align: center;
+    }
+    
+    button {
+      background-color: #2563eb;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background-color 0.2s;
+    }
+    
+    button:hover {
+      background-color: #1d4ed8;
+    }
+    
+    .guess-btn {
+      width: 100%;
+      padding: 10px;
+      margin-top: 16px;
+    }
+    
+    .next-btn {
+      display: flex;
+      margin: 0 auto;
+      align-items: center;
+    }
+    
+    .result {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    
+    .correct {
+      color: #16a34a;
+    }
+    
+    .incorrect {
+      color: #dc2626;
+    }
+    
+    .game-over {
+      text-align: center;
+      padding: 32px;
+    }
+    
+    .game-over h2 {
+      margin-bottom: 16px;
+      font-size: 24px;
+    }
+    
+    .final-score {
+      font-size: 20px;
+      margin-bottom: 16px;
+    }
+    
+    .feedback {
+      margin-bottom: 24px;
+    }
+    
+    .fun-facts {
+      background-color: #e6f2ff;
+      padding: 16px;
+      border-radius: 8px;
+    }
+    
+    .fun-facts h3 {
+      font-size: 16px;
+      margin-bottom: 8px;
+    }
+    
+    .fun-facts ul {
+      padding-left: 20px;
+      font-size: 14px;
+    }
+    
+    .fun-facts li {
+      margin-bottom: 8px;
+    }
+    
+    .note {
+      font-size: 12px;
+      color: #6b7280;
+      text-align: center;
+      margin-top: 16px;
+    }
+  </style>
 </head>
 <body>
-  <div id="root" class="p-4"></div>
-  <script type="text/babel" src="game.js"></script>
+  <div class="container">
+    <h1>Sea Creature Speed Guessing Game</h1>
+    
+    <div id="game-container">
+      <!-- Game content will be inserted here by JavaScript -->
+    </div>
+  </div>
+
+  <script>
+    // Sea creatures data
+    const seaCreatures = [
+      { name: "Blue Whale", speed: 31, emoji: "🐋" },
+      { name: "Sperm Whale", speed: 23, emoji: "🐳" },
+      { name: "Bottlenose Dolphin", speed: 22, emoji: "🐬" },
+      { name: "Killer Whale (Orca)", speed: 34, emoji: "🐋" },
+      { name: "Great White Shark", speed: 35, emoji: "🦈" },
+      { name: "Mako Shark", speed: 60, emoji: "🦈" },
+      { name: "Sailfish", speed: 68, emoji: "🐟" },
+      { name: "Marlin", speed: 50, emoji: "🐠" },
+      { name: "Sea Turtle", speed: 22, emoji: "🐢" },
+      { name: "Flying Fish", speed: 35, emoji: "🐟" }
+    ];
+
+    // Game state
+    let gameState = {
+      currentRound: 0,
+      score: 0,
+      totalRounds: 5,
+      creatures: [],
+      result: null,
+      guess: null,
+      gameOver: false,
+      sliderValue: 30
+    };
+
+    // Initialize the game
+    function initGame() {
+      // Shuffle and select creatures for the game
+      const shuffled = [...seaCreatures].sort(() => 0.5 - Math.random());
+      gameState.creatures = shuffled.slice(0, gameState.totalRounds);
+      gameState.currentRound = 0;
+      gameState.score = 0;
+      gameState.result = null;
+      gameState.guess = null;
+      gameState.gameOver = false;
+      gameState.sliderValue = 30;
+      
+      renderGame();
+    }
+
+    // Make a guess
+    function makeGuess() {
+      if (gameState.result !== null) return;
+      
+      const currentCreature = gameState.creatures[gameState.currentRound];
+      const actualSpeed = currentCreature.speed;
+      const difference = Math.abs(gameState.sliderValue - actualSpeed);
+      
+      // Consider it correct if within 5 mph
+      const correct = difference <= 5;
+      
+      if (correct) {
+        gameState.score += 1;
+      }
+      
+      gameState.guess = gameState.sliderValue;
+      gameState.result = correct;
+      
+      renderGame();
+    }
+
+    // Go to next round
+    function nextRound() {
+      if (gameState.currentRound < gameState.totalRounds - 1) {
+        gameState.currentRound += 1;
+        gameState.result = null;
+        gameState.guess = null;
+      } else {
+        gameState.gameOver = true;
+      }
+      
+      renderGame();
+    }
+
+    // Update slider value
+    function updateSlider(value) {
+      gameState.sliderValue = parseInt(value);
+      document.getElementById('slider-value').textContent = value;
+    }
+
+    // Render game UI based on current state
+    function renderGame() {
+      const gameContainer = document.getElementById('game-container');
+      
+      if (gameState.gameOver) {
+        // Game over screen
+        gameContainer.innerHTML = `
+          <div class="game-over">
+            <h2>Game Over!</h2>
+            <p class="final-score">Your final score: ${gameState.score} out of ${gameState.totalRounds}</p>
+            <p class="feedback">
+              ${gameState.score === gameState.totalRounds 
+                ? "Perfect score! You're a sea creature expert!" 
+                : gameState.score >= gameState.totalRounds / 2 
+                ? "Good job! You know your sea creatures well!" 
+                : "Keep learning about sea creatures and try again!"}
+            </p>
+            <button onclick="initGame()">Play Again</button>
+          </div>
+        `;
+      } else {
+        // Game play screen
+        const currentCreature = gameState.creatures[gameState.currentRound];
+        
+        let contentHTML = `
+          <div class="game-header">
+            <div>Round: ${gameState.currentRound + 1}/${gameState.totalRounds}</div>
+            <div>Score: ${gameState.score}</div>
+          </div>
+          
+          <div class="game-content">
+            <h2>Guess the Speed!</h2>
+            
+            <div class="creature-card">
+              <div class="creature-name">${currentCreature.name}</div>
+              <div class="creature-emoji">${currentCreature.emoji}</div>
+              ${gameState.result !== null 
+                ? `<div class="actual-speed">Actual speed: ${currentCreature.speed} mph</div>` 
+                : ''}
+            </div>
+        `;
+        
+        if (gameState.result === null) {
+          // Guessing state
+          contentHTML += `
+            <div class="slider-container">
+              <label class="slider-label">How fast do you think it swims? (in mph)</label>
+              <div class="slider-input">
+                <input 
+                  type="range" 
+                  min="0" 
+                  max="70" 
+                  value="${gameState.sliderValue}" 
+                  oninput="updateSlider(this.value)"
+                >
+                <span id="slider-value" class="slider-value">${gameState.sliderValue}</span>
+              </div>
+              <button class="guess-btn" onclick="makeGuess()">Guess!</button>
+            </div>
+          `;
+        } else {
+          // Result state
+          contentHTML += `
+            <div class="result">
+              ${gameState.result 
+                ? `<p class="correct">✅ Great job! Your guess was close enough.</p>` 
+                : `<p class="incorrect">❌ Not quite! You guessed ${gameState.guess} mph, but it swims at ${currentCreature.speed} mph.</p>`}
+              <button class="next-btn" onclick="nextRound()">Next →</button>
+            </div>
+          `;
+        }
+        
+        contentHTML += `
+          </div>
+          
+          <div class="fun-facts">
+            <h3>Fun Facts About Sea Creature Speeds:</h3>
+            <ul>
+              <li><strong>Sailfish (🐟):</strong> At 68 mph, the sailfish is considered the fastest fish in the ocean</li>
+              <li><strong>Blue Whale (🐋):</strong> Despite being the largest animal on Earth, blue whales can swim at 31 mph</li>
+              <li><strong>Mako Shark (🦈):</strong> One of the fastest sharks at 60 mph</li>
+            </ul>
+          </div>
+          
+          <p class="note">
+            Note: Speeds are approximate and represent maximum recorded speeds.
+          </p>
+        `;
+        
+        gameContainer.innerHTML = contentHTML;
+      }
+    }
+
+    // Start the game when page loads
+    document.addEventListener('DOMContentLoaded', initGame);
+  </script>
 </body>
 </html>
